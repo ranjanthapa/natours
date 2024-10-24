@@ -1,7 +1,5 @@
 const mongoose = require('mongoose');
 const slugify = require('slugify');
-const User = require('./userModel');
-
 
 const tourSchema = new mongoose.Schema({
     name: {
@@ -77,7 +75,6 @@ const tourSchema = new mongoose.Schema({
     },
     startDates: [Date],
     //child refrencing 
-
     startLocation: {
         type: {
             type: String,
@@ -88,7 +85,7 @@ const tourSchema = new mongoose.Schema({
         address: String,
         description: String
     },
-    locations: {
+    locations: [{
         type: {
             type: String,
             default: "Point",
@@ -97,8 +94,12 @@ const tourSchema = new mongoose.Schema({
         description: String,
         coordinates: [Number],
         day: Number
-    },
-    // guides: Array
+    }],
+    guides: [{
+        type: mongoose.Schema.ObjectId,
+        ref: "User"
+    }]
+
 },
     {
         toJSON: { virtuals: true },
@@ -112,23 +113,40 @@ tourSchema.virtual('durationWeeks').get(function () {
     return this.duration / 7;
 });
 
+
+tourSchema.virtual("reviews", {
+    ref: "Review",
+    foreignField: "tour",
+    localField: '_id'
+})
+
 // document middleware
 tourSchema.pre('save', function (next) {
     this.slug = slugify(this.name, { lower: true });
     next();
 });
 
+// instead of this, shifted to parent ref 
 // tourSchema.pre('save', async function (next) {
-//     const tourPromise = this.guides.map(async (id) => await User.findById(id));
-//     this.guides = await tourPromise.all();
+//     const tourPromise = this.guides.map(async id => await User.findById(id));
+//     this.guides = await Promise.all(tourPromise);
 //     next();
-// })
+// });
+
 
 // query middleware
 tourSchema.pre(/^find/, function (next) {
     // this keyword will point to the query instead of current document
     // the find in the parameter is the query method
     this.find({ secretTour: { $ne: true } });
+    next();
+});
+
+tourSchema.pre(/^find/, function (next) {
+    this.populate({
+        path: 'guides',
+        select: '-_v -passwordChangedAt'
+    });
     next();
 });
 

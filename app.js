@@ -10,6 +10,7 @@ const tourRouter = require('./routes/tourRoutes');
 const userRouter = require('./routes/userRouter');
 const AppError = require("./utils/appError");
 const gloabalErrorHandler = require('./controller/errorController');
+const reviewRouter = require("./routes/reviewRoute");
 
 
 app = express();
@@ -18,6 +19,8 @@ app.use(helmet());
 if (process.env.NODE_ENV === 'development') {
     app.use(morgan('dev'))
 }
+
+
 const throttling = rateLimit({
     max: 100,
     windowMs: 60 * 60 * 1000, // 100 request / hr
@@ -28,8 +31,6 @@ app.use('/api', throttling);
 
 app.use(express.json({ limit: "10kb" }));
 
-app.use('/api/v1/tours', tourRouter);
-app.use('/api/v1/user', userRouter);
 
 // Data sanitization against NoSQL query injection
 app.use(mongoSanitize());
@@ -46,6 +47,11 @@ app.use(hpp({
         'price']
 }));
 
+
+
+app.use('/api/v1/tours', tourRouter);
+app.use('/api/v1/user', userRouter);
+app.use('/api/v1/reviews', reviewRouter);
 app.all('*', (req, res, next) => {
     // const err = new Error(`Can't find the ${req.orginalUrl} on this server`);
     // err.status = "fail";
@@ -56,5 +62,6 @@ app.all('*', (req, res, next) => {
 
 
 app.use(gloabalErrorHandler);
+
 
 module.exports = app; 

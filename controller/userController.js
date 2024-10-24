@@ -1,7 +1,7 @@
-const User = require("../model/userModel");
+const User = require("../models/userModel");
 const AppError = require("../utils/appError");
 const catchAsync = require('./../utils/catchAsync');
-
+const factory = require('./handleFactory');
 
 const filterObj = (obj, ...allowedFields) => {
     const newObj = {}
@@ -12,27 +12,9 @@ const filterObj = (obj, ...allowedFields) => {
 }
 
 
-exports.allUser = catchAsync(async (req, res, next) => {
-    const users = await User.find();
-    return res.status(200).json({
-        status: "sucess",
-        users: {
-            users
-        }
-    })
-});
-
-
-exports.getUserById = catchAsync(async function (req, res, next) {
-    const user = await User.findById(req.params.id);
-    if (!user) {
-        return next(new AppError("User doesn't exists with the given id", 400));
-    }
-    return res.status(200).json({
-        status: "success",
-        data: user
-    });
-});
+exports.allUser = factory.getAll(User);
+exports.getUserById = factory.getOne(User);
+exports.deleteMe = factory.deleteOne(User);
 
 
 
@@ -53,10 +35,3 @@ exports.updateMe = catchAsync(async (req, res, next) => {
     });
 
 });
-
-exports.deleteMe = catchAsync(async (req, res, next) => {
-    await User.findByIdAndUpdate(req.user.id, { active: false });
-    return res.status(204).json({
-        status: "success"
-    })
-})

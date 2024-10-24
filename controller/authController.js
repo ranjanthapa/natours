@@ -1,6 +1,7 @@
 const AppError = require('../utils/appError');
 const catchAsync = require("../utils/catchAsync");
-const User = require - './../model/userModel.js';
+
+const User = require('./../models/userModel.js');
 
 const jwt = require('jsonwebtoken');
 const { promisify } = require('util');
@@ -8,16 +9,8 @@ const validateBeforeSave = require("mongoose/lib/plugins/validateBeforeSave");
 const sendEmail = require("../utils/email");
 const crypto = require('crypto');
 
-const socialMedia = require("../model/userModel.js")
+const socialMedia = require("../models/userModel.js")
 
-
-exports.socialCreate = catchAsync(async (req, res, next) => {
-    const media = await socialMedia.create(req.body);
-    return res.status(200).json({
-        status: "success",
-        data: media
-    })
-})
 
 
 const signToken = id => {
@@ -62,6 +55,7 @@ exports.login = catchAsync(async (req, res, next) => {
     }
 
     const user = await User.findOne({ email }).select("+password");
+
     if (!user || !(await user.isCorrectPassword(password, user.password))) {
         return next(new AppError("Invalid email or password", 401));
     }
@@ -105,8 +99,8 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
 exports.resetPassword = catchAsync(async (req, res, next) => {
     // get user base on token
     const tokenHash = crypto.createHash('sha256').update(req.params.token).digest('hex');
-
     const user = await User.findOne({ resetPasswordToken: tokenHash, resetPasswordTokenExpires: { $gt: Date.now() } })
+
     if (!user) {
         return next(new AppError("Invalid token or the reset duration is expire", 400));
     }
