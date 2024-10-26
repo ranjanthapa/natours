@@ -13,16 +13,34 @@ tourRouter.use('/:tourId/reviews', reviewRouter);
 
 tourRouter.route('/top-5-cheap').get(tourController.alisTour, tourController.getAllTour);
 tourRouter.route('/tour-stats').get(tourController.getTourStats);
-tourRouter.route("/monthly-plan/:year").get(tourController.getMonthlyPlan);
+tourRouter.route("/monthly-plan/:year")
+    .get(authController.protect, authController.restrictTo("admin", "guide", "lead-guide"),
+        tourController.getMonthlyPlan);
+
+tourRouter.route('/tours-within/:distance/center/:latlng/unit/:unit')
+    .get(tourController.getToursWithin);
+
+
+tourRouter.route('/distances/:latlng/unit/:unit').get(tourController.getDistances);
 
 tourRouter.route("/")
-    .post(tourController.checkBody, tourController.createTour)
+    .post(tourController.checkBody,
+        authController.protect,
+        authController.restrictTo("admin", "lead-guide"),
+        tourController.createTour)
     .get(authController.protect, tourController.getAllTour);
 
 tourRouter.route("/:id")
     .get(tourController.getTourById)
-    .patch(tourController.updateByTourID)
-    .delete(authController.protect, authController.restrictTo("admin", "lead-guide"), tourController.deleteTour);
+
+    .patch(authController.protect,
+        authController.restrictTo("admin", "lead-guide"),
+        tourController.updateByTourID)
+
+    .delete(authController.protect,
+        authController.restrictTo("admin", "lead-guide"),
+        tourController.deleteTour);
+
 
 
 

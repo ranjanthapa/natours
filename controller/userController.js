@@ -14,9 +14,22 @@ const filterObj = (obj, ...allowedFields) => {
 
 exports.allUser = factory.getAll(User);
 exports.getUserById = factory.getOne(User);
-exports.deleteMe = factory.deleteOne(User);
 
 
+exports.deleteMe = catchAsync(async (req, res, next) => {
+    await User.findByIdAndUpdate(req.user.id, { active: false });
+
+    res.status(204).json({
+        status: 'success',
+        data: null
+    });
+});
+
+
+exports.getMe = (req, res, next) => {
+    req.params.id = req.user.id;
+    next();
+}
 
 exports.updateMe = catchAsync(async (req, res, next) => {
     if (req.body.password || req.body.confirmPassword) {

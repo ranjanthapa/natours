@@ -10,8 +10,6 @@ const response = (res, statusCode, data) => {
 }
 
 exports.getReview = factory.getOne(Review);
-
-
 exports.getAllReview = factory.getAll(Review);
 
 exports.setUserAndId = (req, res, next) => {

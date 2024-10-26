@@ -23,13 +23,13 @@ exports.updateOne = Model => catchAsync(async (req, res, next) => {
         runValidators: true
     });
 
-    if (!tour) {
+    if (!doc) {
         return next(new AppError("Invalid ID, no doc found", 404));
     }
     return res.status(200).json({
         status: "Success",
         message: {
-            data: null
+            data: doc
         }
     })
 

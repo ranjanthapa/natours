@@ -9,7 +9,6 @@ const validateBeforeSave = require("mongoose/lib/plugins/validateBeforeSave");
 const sendEmail = require("../utils/email");
 const crypto = require('crypto');
 
-const socialMedia = require("../models/userModel.js")
 
 
 
